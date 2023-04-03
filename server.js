@@ -26,8 +26,10 @@ app.use(
 );
 
 mongoose
-  .connect(process.env.MONGODB_URL)
-  .then(() => console.log(`Successfully connected to taskDB!`))
+  .connect(process.env.MONGODB_URL, {
+    dbName: "taskDB",
+  })
+  .then((c) => console.log(`Database connected with ${c.connection.host}`))
   .catch((err) => console.error(err));
 
 app.use("/api/v1/users", userRoutes);
