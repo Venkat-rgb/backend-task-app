@@ -32,6 +32,10 @@ mongoose
   .then((c) => console.log(`Database connected with ${c.connection.host}`))
   .catch((err) => console.error(err));
 
+app.get("/", (req, res) => {
+  res.send("API is working...");
+});
+
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/tasks", taskRoutes);
 
