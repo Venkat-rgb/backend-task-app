@@ -31,7 +31,7 @@ export const registerUser = async (req, res, next) => {
   sendCookie(newUser, 201, `Welcome back ${newUser.username}!`, res);
 };
 
-export const loginUser = async (req, res) => {
+export const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
 
   const isUserExists = await User.findOne({ email });
