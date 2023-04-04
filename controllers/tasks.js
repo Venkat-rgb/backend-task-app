@@ -13,7 +13,7 @@ export const getTasks = async (req, res) => {
 export const createTask = async (req, res, next) => {
   const { title, description } = req.body;
 
-  if (title !== "" && description !== "") {
+  if (title.trim() !== "" && description.trim() !== "") {
     await Task.create({ title, description, user: req.user });
     return res.status(201).json({
       success: true,

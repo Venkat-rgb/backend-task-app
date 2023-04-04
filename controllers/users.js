@@ -14,41 +14,58 @@ export const getUsers = async (req, res) => {
 
 export const registerUser = async (req, res, next) => {
   const { username, email, password } = req.body;
-  const isUserExists = await User.findOne({ email });
 
-  if (isUserExists) {
-    return next(new ErrorHandler("User already exists!", 404));
+  if (username.trim() !== "" || email.trim() !== "" || password.trim() !== "") {
+    const isUserExists = await User.findOne({ email });
+
+    if (isUserExists) {
+      return next(new ErrorHandler("User already exists!", 404));
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+    });
+
+    sendCookie(newUser, 201, `Welcome back ${newUser.username}!`, res);
+  } else {
+    return next(new ErrorHandler("Please enter all the fields!", 404));
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const newUser = await User.create({
-    username,
-    email,
-    password: hashedPassword,
-  });
-
-  sendCookie(newUser, 201, `Welcome back ${newUser.username}!`, res);
 };
 
 export const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const isUserExists = await User.findOne({ email });
+  if (email.trim() !== "" || password.trim() !== "") {
+    const isUserExists = await User.findOne({ email });
 
-  if (!isUserExists) {
-    return next(
-      new ErrorHandler("User Not Found! Please Register First!", 404)
+    if (!isUserExists) {
+      return next(
+        new ErrorHandler("User Not Found! Please Register First!", 404)
+      );
+    }
+
+    const isPasswordMatch = await bcrypt.compare(
+      password,
+      isUserExists.password
     );
+
+    if (!isPasswordMatch) {
+      return next(new ErrorHandler("Passwords doesn't match!", 404));
+    }
+
+    sendCookie(
+      isUserExists,
+      200,
+      `Welcome back ${isUserExists.username}!`,
+      res
+    );
+  } else {
+    return next(new ErrorHandler("Please enter all the fields!", 404));
   }
-
-  const isPasswordMatch = await bcrypt.compare(password, isUserExists.password);
-
-  if (!isPasswordMatch) {
-    return next(new ErrorHandler("Passwords doesn't match!", 404));
-  }
-
-  sendCookie(isUserExists, 200, `Welcome back ${isUserExists.username}!`, res);
 };
 
 export const logoutUser = (req, res) => {
